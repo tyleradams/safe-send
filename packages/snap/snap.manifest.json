@@ -7,7 +7,7 @@
     "url": "git+https://github.com/tyleradams/safe-send.git"
   },
   "source": {
-    "shasum": "LlpWnOU1weCWXqhZk4RE8pbzn3Epe5M85Rq90+qr2Jg=",
+    "shasum": "NU2F2dJ6g4wQAnzc5n5d/QaSaHA0FvYyRCVcn0qhCSQ=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -18,11 +18,6 @@
     }
   },
   "initialPermissions": {
-    "endowment:network-access": {},
-    "endowment:rpc": {
-      "dapps": true,
-      "snaps": false
-    },
     "endowment:transaction-insight": {
       "allowTransactionOrigin": true
     },

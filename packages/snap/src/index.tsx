@@ -104,42 +104,37 @@ export const onTransaction = async ({
 
     const checklist: any[] = [];
 
-    try {
-      nativeToken = transaction.data === '0x';
-      lowerR = nativeToken
-        ? transaction.to
-        : `0x${transaction.data.substring(34, 74)}`;
-      actualRecipient = toChecksumCase(lowerR);
-      code = await getCode(actualRecipient);
-      if (nativeToken) {
-        amount = BigInt(transaction.value);
-      } else {
-        amount = BigInt(`0x${transaction.data.slice(-64)}`);
-      }
-      if (amount === 0n) {
-        recipientType = 'ZERO_SEND';
-      } else if (code === PM_CONTRACT) {
-        recipientType = 'POLYMARKET';
-        rightNetwork = chainId === 'eip155:137';
-        usdcToken =
-          transaction.to ===
-          '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359'.toLowerCase();
-        usdceToken =
-          transaction.to ===
-          '0x2791bca1f2de4661ed88a30c99a7a9449aa84174'.toLowerCase();
-        creationBlockNumber = await findCreationBlockNumber(actualRecipient);
-        eventLog = await getEventLog(creationBlockNumber);
-        matchSender = eventLog?.by === toChecksumCase(transaction.from);
-      } else if (code === '0x') {
-        recipientType = 'UNKNOWN';
-      } else {
-        recipientType = `UnreachableRecipientType`;
-      }
-      matchRecipient = eventLog?.to === actualRecipient;
-    } catch (e) {
-      const err: Error = e as Error;
-      error = { err, s: err.toString(), stack: err.stack };
+    nativeToken = transaction.data === '0x';
+    lowerR = nativeToken
+      ? transaction.to
+      : `0x${transaction.data.substring(34, 74)}`;
+    actualRecipient = toChecksumCase(lowerR);
+    code = await getCode(actualRecipient);
+    if (nativeToken) {
+      amount = BigInt(transaction.value);
+    } else {
+      amount = BigInt(`0x${transaction.data.slice(-64)}`);
     }
+    if (amount === 0n) {
+      recipientType = 'ZERO_SEND';
+    } else if (code === PM_CONTRACT) {
+      recipientType = 'POLYMARKET';
+      rightNetwork = chainId === 'eip155:137';
+      usdcToken =
+        transaction.to ===
+        '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359'.toLowerCase();
+      usdceToken =
+        transaction.to ===
+        '0x2791bca1f2de4661ed88a30c99a7a9449aa84174'.toLowerCase();
+      creationBlockNumber = await findCreationBlockNumber(actualRecipient);
+      eventLog = await getEventLog(creationBlockNumber);
+      matchSender = eventLog?.by === toChecksumCase(transaction.from);
+    } else if (code === '0x') {
+      recipientType = 'UNKNOWN';
+    } else {
+      recipientType = `UnreachableRecipientType`;
+    }
+    matchRecipient = eventLog?.to === actualRecipient;
 
     const config = {
       keys: {
@@ -285,6 +280,7 @@ const icons: any = [ 'add-square', 'add', 'arrow-2-down', 'arrow-2-left', 'arrow
   } catch (e) {
     const err: Error = e as Error;
     error = { err, s: err.toString(), stack: err.stack };
+
     return {
       content: (
         <Box>
@@ -302,22 +298,7 @@ const icons: any = [ 'add-square', 'add', 'arrow-2-down', 'arrow-2-left', 'arrow
  * @param params
  */
 async function rpcRequest(method, params) {
-  const rpcUrl = 'https://polygon-rpc.com';
-  const response = await fetch(rpcUrl, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: 1,
-      method,
-      params,
-    }),
-  });
-  const json = await response.json();
-  if (json.error) {
-    throw new Error(json.error.message);
-  }
-  return json.result;
+  return await ethereum.request({method, params: params })
 }
 
 /**
@@ -326,7 +307,6 @@ async function rpcRequest(method, params) {
  */
 async function getCode(address) {
   return await rpcRequest('eth_getCode', [address, 'latest']);
-  return code !== '0x';
 }
 
 /**
@@ -361,9 +341,8 @@ async function findCreationBlockNumber(address) {
 async function getEventLog(blockNumber) {
   const eventTopic =
     '0x4f51faf6c4561ff95f067657e43439f0f856d97c04d9ec9070a6199ad418e235';
-  const receipts = await rpcRequest('eth_getBlockReceipts', [
-    `0x${blockNumber.toString(16)}`,
-  ]);
+  const block = await rpcRequest('eth_getBlockByNumber', [ `0x${blockNumber.toString(16)}`, false]);
+  const receipts = await Promise.all(block.transactions.map(async t => await rpcRequest('eth_getTransactionReceipt', [ t ])));
   for (const r of receipts) {
     const logs = r.logs.filter((l) => l.topics[0] === eventTopic);
     if (logs.length) {
@@ -371,15 +350,10 @@ async function getEventLog(blockNumber) {
       console.log(log);
       const to = toChecksumCase(`0x${log.data.slice(26, 66)}`);
       const by = toChecksumCase(`0x${log.data.slice(90, 130)}`);
-      // trace = await provider.send("debug_traceTransaction", [tx, {}]);
       return { eventTopic, log, to, by };
     }
   }
 }
-/**
- *
- * @param obj
- */
 function jsonStr(obj) {
   return JSON.stringify(obj, (key, value) => {
     if (typeof value === 'bigint') {
