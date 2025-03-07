@@ -1,13 +1,13 @@
 {
   "version": "0.1.0",
-  "description": "An example Snap written in TypeScript.",
-  "proposedName": "TypeScript Example",
+  "description": "Ensures sending is safe",
+  "proposedName": "Blitz Safe Send",
   "repository": {
     "type": "git",
     "url": "https://github.com/MetaMask/template-snap-monorepo.git"
   },
   "source": {
-    "shasum": "ijpsnNI3VbAlYRcVq8cWcHH3BLHadOfGPoGk0HaZjMY=",
+    "shasum": "rzjOwIXT9Ewk/Bhzg/tM4EAI3tIgjqQEDSgJliipzP0=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -17,11 +17,17 @@
     }
   },
   "initialPermissions": {
-    "snap_dialog": {},
+    "endowment:network-access": {},
     "endowment:rpc": {
       "dapps": true,
       "snaps": false
-    }
+    },
+    "endowment:transaction-insight": {
+      "allowTransactionOrigin": true
+    },
+    "endowment:ethereum-provider": {},
+    "snap_dialog": {},
+    "snap_manageState": {}
   },
   "platformVersion": "6.14.0",
   "manifestVersion": "0.1"
