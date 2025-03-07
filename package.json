@@ -2,7 +2,7 @@
   "name": "root",
   "version": "0.1.0",
   "private": true,
-  "description": "",
+  "description": "Helps you send money safely",
   "homepage": "https://github.com/tyleradams/safe-send#readme",
   "bugs": {
     "url": "https://github.com/tyleradams/safe-send/issues"
