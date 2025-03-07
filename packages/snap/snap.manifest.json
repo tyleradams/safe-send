@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Ensures sending is safe",
   "proposedName": "Safe Send",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "git+https://github.com/tyleradams/safe-send.git"
   },
   "source": {
-    "shasum": "NU2F2dJ6g4wQAnzc5n5d/QaSaHA0FvYyRCVcn0qhCSQ=",
+    "shasum": "xZmH0Fomq0TCpD4z6nKVb/h91GRS9LN+JJhA5tlmYsg=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
