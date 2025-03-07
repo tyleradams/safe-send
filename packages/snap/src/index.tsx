@@ -143,134 +143,31 @@ export const onTransaction = async ({
 
     const config = {
       keys: {
-        account: { true: 'account_matched', false: 'account_mismatched' },
-        network: { true: 'network_correct', false: 'network_incorrect' },
+        account: { true: 'account_matched', false: 'account_mismatched', null: 'account_null' },
+        network: { true: 'network_correct', false: 'network_incorrect', null: 'network_null' },
       },
       messages: {
-        account_matched: [
-          'check',
-          'success',
-          'account confirmed: this is the same account used to deploy your polymarket contract',
-        ],
-        account_mismatched: [
-          '?',
-          'warning',
-          `warning: account mismatch detected. expected deployer account, but got ${eventLog.by}`,
-        ],
-        deployment: [
-          'i',
-          'default',
-          'deployment info: your polymarket contract was deployed on [date]',
-        ],
-        network_correct: [
-          'check',
-          'success',
-          "network confirmed: you're on the correct network for polymarket transactions",
-        ],
-        network_incorrect: [
-          '!',
-          'error',
-          'error: incorrect network detected. switch immediately to avoid issues',
-        ],
+        account_matched: [ 'check', 'success', 'account confirmed: this is the same account used to deploy your polymarket contract', ],
+        account_mismatched: [ '?', 'warning', `warning: account mismatch detected. expected deployer account, but got ${eventLog?.by}`, ],
+        //deployment: [ 'i', 'default', 'deployment info: your polymarket contract was deployed on [date]', ],
+        network_correct: [ 'check', 'success', "network confirmed: you're using Polygon mainnet, the correct network for polymarket transactions", ],
+        network_incorrect: [ '!', 'error', 'error: Cancel transaction and switch network to Polygon mainnet to stay safe', ],
         token_usdce: ['check', 'success', 'token verified: usdc(e) is in use'],
-        token_usdc: [
-          '?',
-          'warning',
-          'warning: usdc detected. redemption required',
-        ],
-        token_incorrect: [
-          '!',
-          'error',
-          'error: incorrect token found. transaction halted to prevent fund loss',
-        ],
-        token_error: [
-          '!',
-          'error',
-          'error: token verification failed due to network misconfiguration',
-        ],
-        wallet: [
-          '?',
-          'warning',
-          'warning: wallet unknown. proceed with caution and verify recipient details',
-        ],
+        token_usdc: [ '?', 'warning', 'warning: usdc detected, redemption required after funds are in Polymarket', ],
+        token_incorrect: [ '!', 'error', 'error: Cancel transaction and switch token to USDC/USDCe on Polygon to stay safe', ],
+        POLYMARKET: ['i', 'default', 'depositing into a polymarket account.'],
+        UNKNOWN: ['?', 'warning', 'unknown recipient: extra caution required.'],
+        ZERO_SEND: ['?', 'warning', 'sending $0: unusual but no risk detected.'],
+        UnreachableRecipientType: ['!', 'error', 'You shouldn\'t see this, be careful and contact support immediately at tyler@blitzblitzblitz.com'],
       },
-      checklist: {
-        polymarket: {
-          account_matched: {
-            network_correct: {
-              token_usdce: [
-                'account_matched',
-                'deployment',
-                'network_correct',
-                'token_usdce',
-              ],
-              token_usdc: [
-                'account_matched',
-                'deployment',
-                'network_correct',
-                'token_usdc',
-              ],
-              token_incorrect: [
-                'account_matched',
-                'deployment',
-                'network_correct',
-                'token_incorrect',
-              ],
-            },
-            network_incorrect: {
-              default: [
-                'account_matched',
-                'deployment',
-                'network_incorrect',
-                'token_error',
-              ],
-            },
-          },
-          account_mismatched: {
-            network_correct: {
-              token_usdce: [
-                'account_mismatched',
-                'deployment',
-                'network_correct',
-                'token_usdce',
-              ],
-              token_usdc: [
-                'account_mismatched',
-                'deployment',
-                'network_correct',
-                'token_usdc',
-              ],
-              token_incorrect: [
-                'account_mismatched',
-                'deployment',
-                'network_correct',
-                'token_incorrect',
-              ],
-            },
-            network_incorrect: {
-              default: [
-                'account_mismatched',
-                'deployment',
-                'network_incorrect',
-                'token_error',
-              ],
-            },
-          },
-        },
-        unknown: { wallet: ['wallet'] },
+      displayTypeMap: {
       },
-      displayRecipientType: {
-        polymarket: 'depositing into a polymarket account.',
-        unknown: 'unknown recipient: extra caution required.',
-        zero_send: 'sending $0: no risk detected.',
-      },
-      supportEmail: 'tyler@blitzblitzblitz.com',
       masterStatusDisplay: {
         default: 'all clear: safe to proceed',
         success: 'all clear: safe to proceed',
-        warning: 'caution: proceed with attention',
+        warning: 'caution: proceed carefully',
         error:
-          'error: critical issues detected. contact support immediately at tyler@blitzblitzblitz.com',
+          'error: Cancel transaction or you could lose your money',
       },
       priority: { default: -1, success: 0, warning: 1, error: 2 },
     };
@@ -278,9 +175,6 @@ export const onTransaction = async ({
     const {
       keys,
       messages,
-      checklist: cfgChecklist,
-      displayRecipientType: displayTypeMap,
-      supportEmail,
       masterStatusDisplay,
       priority: prio,
     } = config;
@@ -291,36 +185,26 @@ export const onTransaction = async ({
     const tokenKey =
       (Object.entries(tokenMap).find(([, v]) => v) ?? [])[0] ??
       'token_incorrect';
-    const recipientKey = recipientType.toLowerCase();
+    const keyLists = {
+      POLYMARKET: [accountKey, networkKey, tokenKey],
+      UNKNOWN: [],
+      ZERO_SEND: [],
+      UnreachableRecipientType: [],
+    }
 
-    const recipientConfig = config.checklist[recipientKey] ?? {};
-    const accountConfig = recipientConfig[accountKey] ?? {};
-    const networkConfig = accountConfig[networkKey] ?? {};
-
-    const networkMapping = {
-      network_correct: networkConfig[tokenKey],
-      network_incorrect: networkConfig.default,
-    };
-    const rawChecklistKeys =
-      networkMapping[networkKey] ?? config.checklist.unknown.wallet;
-    const finalChecklist = rawChecklistKeys.map((key) => messages[key]);
+    const finalChecklist = [recipientType, ...keyLists[recipientType]].map((key) => messages[key]);
 
     checklist.push(...finalChecklist);
 
     const masterStatusValue = checklist
       .map((item) => prio[item[1]])
-      .reduce((a, b) => Math.max(a, b), -1);
+      .reduce((a, b) => Math.max(a, b), 0);
     const masterStatusKey =
       Object.keys(prio).find((key) => prio[key] === masterStatusValue) ??
       'default';
 
-    const displayType =
-      displayTypeMap[recipientKey] ??
-      `warning: unexpected recipient type (${recipientType}). contact support immediately at ${supportEmail}`;
-
     checklist.unshift(
       [masterStatusKey, masterStatusKey, masterStatusDisplay[masterStatusKey]],
-      ['i', 'default', displayType],
     );
 
     const emojiMapping = {
@@ -357,7 +241,6 @@ const icons: any = [ 'add-square', 'add', 'arrow-2-down', 'arrow-2-left', 'arrow
     const debugOutput = (
       <Box>
         <Heading>Debug Output</Heading>
-        {iconPallet}
         <Text>
           {jsonStr({
             transaction,

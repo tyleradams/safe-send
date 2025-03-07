@@ -1,13 +1,13 @@
 {
   "version": "0.1.0",
   "description": "Ensures sending is safe",
-  "proposedName": "Blitz Safe Send",
+  "proposedName": "Safe Send",
   "repository": {
     "type": "git",
     "url": "https://github.com/MetaMask/template-snap-monorepo.git"
   },
   "source": {
-    "shasum": "eT8ZzHmRSVIEhgLQlI2WJSn4mBDx6qfTirU1q0LfmE0=",
+    "shasum": "jL9lrr90K90/r+SkKPUHtUcXA6OExb7flxYAQAJol68=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
