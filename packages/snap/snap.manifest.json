@@ -4,10 +4,10 @@
   "proposedName": "Safe Send",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+    "url": "git+https://github.com/tyleradams/safe-send.git"
   },
   "source": {
-    "shasum": "yG5epzdSu9YGnFQSCyu42RtocNlJiqNKq1gla3fUWkY=",
+    "shasum": "LlpWnOU1weCWXqhZk4RE8pbzn3Epe5M85Rq90+qr2Jg=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
