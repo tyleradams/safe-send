@@ -3,6 +3,9 @@ import { Box, Text, Bold, Heading } from '@metamask/snaps-sdk/jsx';
 import { keccak_256 } from "@noble/hashes/sha3";
 
 const PM_CONTRACT = "0x6080604052600080546001600160a01b0316813563530ca43760e11b1415602857808252602082f35b3682833781823684845af490503d82833e806041573d82fd5b503d81f3fea264697066735822122015938e3bf2c49f5df5c1b7f9569fa85cc5d6f3074bb258a2dc0c7e299bc9e33664736f6c63430008040033"
+
+
+
 function toChecksumCase(address: string): string {
   if (typeof address !== "string" || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
     throw new Error(`Invalid address format: ${address}`);
@@ -90,6 +93,8 @@ export const onTransaction = async ({ transaction, chainId, transactionOrigin })
     let matchRecipient: any = null
     let severity = "critical"
 
+    const checklist: any[] = []
+
     try {
 
       nativeToken = transaction.data === "0x"
@@ -122,19 +127,62 @@ export const onTransaction = async ({ transaction, chainId, transactionOrigin })
       error = {err, s: err.toString(), stack: err.stack}
     }
     const colors: any = [ 'default' , 'alternative' , 'muted' , 'error' , 'success' , 'warning']
-    const masterStatus = "Safe"
-    const displayRecipientType = {
-    }[recipientType]
-    const checklist: any = [
-      ["CHECK", "success", masterStatus],
-      ["i", "success", displayRecipientType],
-    ]
+    if(recipientType === "POLYMARKET") {
+      if(matchSender) {
+        checklist.push(["CHECK", "success", "This is the same account you used when you to deploy the Polymarket Contract"])
+      } else {
+        checklist.push(["?", "warning", `This is not the same account you used, ${eventLog.by}, when you deployed the Polymarket Contract`])
+      }
 
-            // {checklist.map(row => { return (<Text color={row[1]}>{row[2]}</Text>)w })}
+      checklist.push(["i", "default", `Your Polymarket contract was deployed on `])
+
+      if(rightNetwork) {
+        checklist.push(["CHECK", "success", "You're using the right network, Polymarket"])
+      } else {
+        checklist.push(["!", "error", "DO NOT PROCEED You are NOT using the right network"])
+      }
+
+      if(usdceToken) {
+        checklist.push(["CHECK", "success", "You're using the right token, USDCe"])
+      } else if(usdcToken) {
+        checklist.push(["?", "warning", "You're using an acceptable token, USDC, but you will need to redeem it"])
+      } else {
+        checklist.push(["!", "error", "DO NOT PROCEED YOU MAY LOSE YOUR FUNDS, you are NOT using an accepted token"])
+      }
+    } else if (recipientType === "UNKNOWN") {
+        checklist.push(["?", "warning", `PROCEED WITH CAUTION: We do not know anything about this wallet`])
+    }
+    const priority = {
+      "default": -1,
+      "success": 0,
+      "warning": 1,
+      "error": 2,
+    }
+    const masterStatus = checklist.map(r => r[1]).reduce((a, c) => {
+      if(priority[a] < priority[c]) return c;
+      return a
+    }, "success")
+    const displayRecipientTypeMap = {
+      "ZERO_SEND": "Sending $0, so nothing can go wrong",
+      "UNKNOWN": "We have no idea who you are sending this to, be careful",
+      "POLYMARKET": "You're depositing into a Polymarket account",
+      "UnreachableRecipientType": "Our bad, there's a bug, please reach out to tyler@blitzblitzblitz.com so he can fix this"
+    }
+    const displayRecipientType = displayRecipientTypeMap[recipientType] ?? `Our bad, we're not handling ${recipientType} properly, please reach out to tyler@blitzblitzblitz.com so he can fix this`
+    const masterStatusDisplayMap = {
+      "default": "",
+      "success": "SAFE",
+      "warning": "WARNING YOU MAY PROCEED WITH CAUTION",
+      "error": "DANGER DANGER DO NOT PROCEED YOU COULD LOSE YOUR FUNDS",
+    }
+    checklist.unshift(...[
+      ["CHECK", masterStatus, masterStatusDisplayMap[masterStatus]],
+      ["i", "success", displayRecipientType],
+    ])
     return {
       content: (
          <Box>
-          <Heading>{masterStatus}</Heading>
+          {checklist.map(row => { return (<Text color={row[1]}>{row[2].toString()}</Text>) })}
           <Heading>Text colors</Heading>
             {colors.map(c => (( <Text color={c}>{c}</Text>)))}
           <Heading>Debug Output</Heading>
@@ -157,6 +205,7 @@ export const onTransaction = async ({ transaction, chainId, transactionOrigin })
               eventLog,
               matchRecipient,
               matchSender,
+              checklist,
               error
             })}</Text>
         </Box>
