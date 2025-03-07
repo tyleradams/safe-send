@@ -11,8 +11,8 @@
     "type": "git",
     "url": "git+https://github.com/MetaMask/template-snap-monorepo.git"
   },
-  "license": "(MIT-0 OR Apache-2.0)",
-  "author": "",
+  "license": "Private",
+  "author": "Blitz Blitz Blitz",
   "workspaces": [
     "packages/*"
   ],
