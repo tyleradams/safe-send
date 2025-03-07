@@ -45,7 +45,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   request,
 }) => {
   const x = 1;
-  console.log('Test', x);
   switch (request.method) {
     case 'hello':
       return snap.request({
@@ -83,7 +82,6 @@ export const onTransaction = async ({
 }) => {
   let error: any = null;
   try {
-    console.log('OnTx', { transaction, chainId });
     const accounts = []; // await ethereum.request({ method: "eth_requestAccounts", params: [] })
     // parse tx, do checks, etc
     let recipientType = 'UNKNOWN';
@@ -347,7 +345,6 @@ async function getEventLog(blockNumber) {
     const logs = r.logs.filter((l) => l.topics[0] === eventTopic);
     if (logs.length) {
       const log = logs[0];
-      console.log(log);
       const to = toChecksumCase(`0x${log.data.slice(26, 66)}`);
       const by = toChecksumCase(`0x${log.data.slice(90, 130)}`);
       return { eventTopic, log, to, by };
@@ -370,4 +367,4 @@ function jsonStr(obj) {
     } // stringify set
     return value; // default case
   });
-}
+} 
