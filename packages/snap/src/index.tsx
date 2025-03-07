@@ -319,23 +319,32 @@ export const onTransaction = async ({
       `warning: unexpected recipient type (${recipientType}). contact support immediately at ${supportEmail}`;
 
     checklist.unshift(
-      ['check', masterStatusKey, masterStatusDisplay[masterStatusKey]],
-      ['i', 'success', displayType],
+      [masterStatusKey, masterStatusKey, masterStatusDisplay[masterStatusKey]],
+      ['i', 'default', displayType],
     );
 
+    const emojiMapping = {
+      'check': '✅',
+      'success': '✅',
+      '?': '⚠️',
+      'warning': '⚠️',
+      'i': 'ℹ️',
+      'default': 'ℹ️',
+      '!': '🥵',
+      'error': '🥵',
+    }
     const iconMapping = {
-      check: 'confirmation',
+      'check': 'confirmation',
       '?': 'question',
+      'i': 'question',
       '!': 'danger'
     }
 
-    // checklist.push(["i", "default", "For any Blitz Safe Send questions, email tyler@blitzblitzblitz.com"])
-//const icons: any = [ 'add-square', 'add', 'arrow-2-down', 'arrow-2-left', 'arrow-2-right', 'arrow-2-up', 'arrow-2-up-right', 'arrow-double-left', 'arrow-double-right', 'arrow-down', 'arrow-left', 'arrow-right', 'arrow-up', 'bank-token', 'bank', 'book', 'bookmark', 'bridge', 'calculator', 'card-pos', 'card-token', 'card', 'category', 'chart', 'check-bold', 'check', 'clock', 'close', 'code-circle', 'coin', 'confirmation', 'connect', 'copy-success', 'copy', 'customize', 'danger', 'dark', 'data', 'diagram', 'document-code', 'drag-drop', 'dragging-animation', 'pinning-animation', 'edit', 'eraser', 'ethereum', 'expand', 'explore', 'export', 'eye-slash', 'eye', 'filter', 'flag', 'flash-slash', 'flash', 'full-circle', 'gas', 'global-search', 'global', 'graph', 'hardware', 'heart', 'hierarchy', 'home', 'import', 'info', 'key', 'light', 'link', 'loading', 'lock-circle', 'lock-slash', 'lock', 'login', 'logout', 'menu', 'message-question', 'messages', 'minus-bold', 'minus-square', 'minus', 'mobile', 'money', 'monitor', 'more-horizontal', 'more-vertical', 'notification-circle', 'notification', 'password-check', 'people', 'pin', 'programming-arrows', 'custody', 'question', 'received', 'refresh', 'save', 'scan-barcode', 'scan-focus', 'scan', 'scroll', 'search', 'security-card', 'security-cross', 'security-key', 'security-search', 'security-slash', 'security-tick', 'security-time', 'security-user', 'security', 'send-1', 'send-2', 'setting', 'slash', 'snaps-mobile', 'snaps-plus', 'snaps', 'speedometer', 'star', 'stake', 'student', 'swap-horizontal', 'swap-vertical', 'tag', 'tilde', 'timer', 'trash', 'trend-down', 'trend-up', 'user-circle-add', 'user-circle-link', 'user-circle-remove', 'user-circle', 'user', 'wallet-card', 'wallet-money', 'wallet', 'warning', 'twitter', 'qr-code', 'user-check', 'unpin', 'ban', 'bold', 'circle-x', 'download', 'file', 'flask', 'plug', 'share', 'square', 'tint', 'upload', 'usb', 'wifi', 'plus-minus' ]
 const icons: any = [ 'add-square', 'add', 'arrow-2-down', 'arrow-2-left', 'arrow-2-right', 'arrow-2-up', 'arrow-2-up-right', 'arrow-double-left', 'arrow-double-right', 'arrow-down', 'arrow-left', 'arrow-right', 'arrow-up', 'bank-token', 'bank', 'book', 'bookmark', 'bridge', 'calculator', 'card-pos', 'card-token', 'card', 'category', 'chart', 'check-bold', 'check', 'clock', 'close', 'code-circle', 'coin', 'confirmation', 'connect', 'copy-success', 'copy', 'customize', 'danger', 'dark', 'data', 'diagram', 'document-code', 'drag-drop', 'dragging-animation', 'pinning-animation', 'edit', 'eraser', 'ethereum', 'expand', 'explore', 'export', 'eye-slash', 'eye', 'filter', 'flag', 'flash-slash', 'flash', 'full-circle', 'gas', 'global-search', 'global', 'graph', 'hardware', 'heart', 'hierarchy', 'home', 'import', 'info', 'key', 'light', 'link', 'loading', 'lock-circle', 'lock-slash', 'lock', 'login', 'logout', 'menu', 'message-question', 'messages', 'minus-bold', 'minus-square', 'minus', 'mobile', 'money', 'monitor', 'more-horizontal', 'more-vertical', 'notification-circle', 'notification', 'password-check', 'people', 'pin', 'programming-arrows', 'custody', 'question', 'received', 'refresh', 'save', 'scan-barcode', 'scan-focus', 'scan', 'scroll', 'search', 'security-card', 'security-cross', 'security-key', 'security-search', 'security-slash', 'security-tick', 'security-time', 'security-user', 'security', 'send-1', 'send-2', 'setting', 'slash', 'snaps-mobile', 'snaps-plus', 'snaps', 'speedometer', 'star', 'stake', 'student', 'swap-horizontal', 'swap-vertical', 'tag', 'tilde', 'timer', 'trash', 'trend-down', 'trend-up', 'user-circle-add', 'user-circle-link', 'user-circle-remove', 'user-circle', 'user', 'wallet-card', 'wallet-money', 'wallet', 'warning', 'twitter', 'qr-code', 'user-check', 'unpin', 'ban', 'bold', 'circle-x', 'download', 'file', 'flask', 'plug', 'share', 'square', 'tint', 'upload', 'usb', 'wifi', 'plus-minus' ]
     const iconPallet = (
       <Box>
         <Heading>Icons</Heading>
-          {icons.slice(0, 200).map(i => {
+          {icons.map(i => {
           return (
             <Box>
               <Text>{i}</Text>
@@ -382,7 +391,7 @@ const icons: any = [ 'add-square', 'add', 'arrow-2-down', 'arrow-2-left', 'arrow
           {checklist.map((row) => {
             return (
               <Box>
-                <Text color={row[1]}>{row[2].toString()}</Text>
+                <Text color={row[1]}>{emojiMapping[row[0]]} {row[2].toString()}</Text>
               </Box>
           )
           })}
