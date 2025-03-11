@@ -7,7 +7,7 @@
     "url": "git+https://github.com/tyleradams/safe-send.git"
   },
   "source": {
-    "shasum": "HZZXO2G4EN68zbG6FnFLrwKe9mDXePT2gYZ9kh0x+BA=",
+    "shasum": "wKDVye2P8nYgwC4S/WpR4uOHUnrvPV3Ze4BDldndLVQ=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

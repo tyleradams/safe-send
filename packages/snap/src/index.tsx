@@ -82,10 +82,9 @@ export const onTransaction = async ({
 }) => {
   let error: any = null;
   try {
-    const accounts = []; // await ethereum.request({ method: "eth_requestAccounts", params: [] })
     // parse tx, do checks, etc
     let recipientType = 'UNKNOWN';
-    let rightNetwork: any = null;
+    let polygonNetwork: any = null;
     let usdcToken: any = null;
     let usdceToken: any = null;
     let lowerR: any = null;
@@ -108,6 +107,7 @@ export const onTransaction = async ({
       : `0x${transaction.data.substring(34, 74)}`;
     actualRecipient = toChecksumCase(lowerR);
     code = await getCode(actualRecipient);
+    polygonNetwork = chainId === 'eip155:137';
     if (nativeToken) {
       amount = BigInt(transaction.value);
     } else {
@@ -117,7 +117,6 @@ export const onTransaction = async ({
       recipientType = 'ZERO_SEND';
     } else if (code === PM_CONTRACT) {
       recipientType = 'POLYMARKET';
-      rightNetwork = chainId === 'eip155:137';
       usdcToken =
         transaction.to ===
         '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359'.toLowerCase();
@@ -133,36 +132,36 @@ export const onTransaction = async ({
       recipientType = `UnreachableRecipientType`;
     }
     matchRecipient = eventLog?.to === actualRecipient;
-
     const config = {
       keys: {
         account: { true: 'account_matched', false: 'account_mismatched', null: 'account_null' },
         network: { true: 'network_correct', false: 'network_incorrect', null: 'network_null' },
       },
       messages: {
-        account_matched: [ 'check', 'success', 'account confirmed: this is the same account used to deploy your polymarket contract', ],
-        account_mismatched: [ '?', 'warning', `warning: account mismatch detected. expected deployer account, but got ${eventLog?.by}`, ],
+        account_matched: [ 'check', 'success', 'This is the same account used to deploy your Polymarket contract', ],
+        account_mismatched: [ '?', 'warning', `${eventLog?.by} made the Polymarket contract, make sure this isn't someone elses Polymarket address`, ],
         //deployment: [ 'i', 'default', 'deployment info: your polymarket contract was deployed on [date]', ],
-        network_correct: [ 'check', 'success', "network confirmed: you're using Polygon mainnet, the correct network for polymarket transactions", ],
-        network_incorrect: [ '!', 'error', 'error: Cancel transaction and switch network to Polygon mainnet to stay safe', ],
-        token_usdce: ['check', 'success', 'token verified: usdc(e) is in use'],
-        token_usdc: [ '?', 'warning', 'warning: usdc detected, redemption required after funds are in Polymarket', ],
-        token_incorrect: [ '!', 'error', 'error: Cancel transaction and switch token to USDC/USDCe on Polygon to stay safe', ],
-        POLYMARKET: ['i', 'default', 'depositing into a polymarket account.'],
-        UNKNOWN: ['?', 'warning', 'unknown recipient: extra caution required.'],
-        ZERO_SEND: ['?', 'warning', 'sending $0: unusual but no risk detected.'],
+        network_correct: [ 'check', 'success', "You're using Polygon mainnet, the correct network for Polymarket transactions", ],
+        network_incorrect: [ '!', 'error', 'Cancel transaction and switch network to Polygon mainnet to stay safe', ],
+        token_usdce: ['check', 'success', 'Using the right token, USDCe'],
+        token_usdc: [ '?', 'warning', 'Using USDC, funds activation required in your Polymarket account', ],
+        token_incorrect: [ '!', 'error', 'Cancel transaction and switch token to USDC/USDCe on Polygon to stay safe', ],
+        disclaimer: ['i', 'default', 'This metamask snap is an independent project and is not affiliated with, endorsed by, or associated with Polymarket'],
+        POLYMARKET: ['i', 'default', 'Depositing into a Polymarket® account.'],
+        UNKNOWN: ['?', 'warning', 'Cancel Transaction if you are trying to send funds to Polymarket® , double check "Network" is Polygon and "To" address is correct'],
+        ZERO_SEND: ['?', 'warning', 'Sending $0: unusual but no risk detected.'],
         UnreachableRecipientType: ['!', 'error', 'You shouldn\'t see this, be careful and contact support immediately at tyler@blitzblitzblitz.com'],
       },
       displayTypeMap: {
       },
       masterStatusDisplay: {
-        default: 'all clear: safe to proceed',
-        success: 'all clear: safe to proceed',
-        warning: 'caution: proceed carefully',
+        default: 'Safe to proceed',
+        success: 'Safe to proceed',
+        warning: 'Proceed carefully',
         error:
-          'error: Cancel transaction or you could lose your money',
+          'Cancel transaction or you could lose your money',
       },
-      priority: { default: -1, success: 0, warning: 1, error: 2 },
+      priority: { alternative: -1, default: 0, success: 1, warning: 2, error: 3 },
     };
 
     const {
@@ -173,13 +172,13 @@ export const onTransaction = async ({
     } = config;
 
     const accountKey = keys.account[String(matchSender)];
-    const networkKey = keys.network[String(rightNetwork)];
+    const networkKey = keys.network[String(polygonNetwork)];
     const tokenMap = { token_usdce: usdceToken, token_usdc: usdcToken };
     const tokenKey =
       (Object.entries(tokenMap).find(([, v]) => v) ?? [])[0] ??
       'token_incorrect';
     const keyLists = {
-      POLYMARKET: [accountKey, networkKey, tokenKey],
+      POLYMARKET: [accountKey, networkKey, tokenKey, "disclaimer"],
       UNKNOWN: [],
       ZERO_SEND: [],
       UnreachableRecipientType: [],
@@ -238,7 +237,6 @@ const icons: any = [ 'add-square', 'add', 'arrow-2-down', 'arrow-2-left', 'arrow
           {jsonStr({
             transaction,
             chainId,
-            accounts,
             transactionOrigin,
             nativeToken,
             lowerR,
@@ -246,7 +244,7 @@ const icons: any = [ 'add-square', 'add', 'arrow-2-down', 'arrow-2-left', 'arrow
             code,
             amount,
             recipientType,
-            rightNetwork,
+            polygonNetwork,
             usdcToken,
             usdceToken,
             creationBlockNumber,
@@ -367,4 +365,4 @@ function jsonStr(obj) {
     } // stringify set
     return value; // default case
   });
-} 
+}
