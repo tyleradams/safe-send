@@ -1,6 +1,6 @@
 {
-  "name": "snap",
-  "version": "0.1.2",
+  "name": "safe-send",
+  "version": "1.0.0",
   "description": "Helps you send money safely",
   "repository": {
     "type": "git",

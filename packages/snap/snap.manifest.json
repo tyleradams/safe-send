@@ -1,5 +1,5 @@
 {
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "Ensures sending is safe",
   "proposedName": "Safe Send",
   "repository": {
@@ -7,11 +7,11 @@
     "url": "git+https://github.com/tyleradams/safe-send.git"
   },
   "source": {
-    "shasum": "wKDVye2P8nYgwC4S/WpR4uOHUnrvPV3Ze4BDldndLVQ=",
+    "shasum": "XsZ0F2ZUckrLuadazewO5ZJhe7s7HqXHo8mYaymZ8s0=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
-        "packageName": "snap",
+        "packageName": "safe-send",
         "registry": "https://registry.npmjs.org/",
         "iconPath": "icons/image.svg"
       }
