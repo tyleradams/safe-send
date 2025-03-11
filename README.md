@@ -1,3 +1,3 @@
 # Safe Send
 
-Coming soon
+See packages/snap/README.md
