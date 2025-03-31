@@ -1,13 +1,13 @@
 {
-  "version": "1.0.0",
-  "description": "Ensures sending is safe",
+  "version": "1.0.2",
+  "description": "Verify transactions and ensure funds are sent safely to intended recipients",
   "proposedName": "Safe Send",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tyleradams/safe-send.git"
   },
   "source": {
-    "shasum": "XsZ0F2ZUckrLuadazewO5ZJhe7s7HqXHo8mYaymZ8s0=",
+    "shasum": "ipsHDXONQumdJTv/x99x2StYYYagcD0P7awhHYzF2bY=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

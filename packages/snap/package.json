@@ -1,7 +1,7 @@
 {
   "name": "safe-send",
-  "version": "1.0.0",
-  "description": "Helps you send money safely",
+  "version": "1.0.2",
+  "description": "Verify transactions and ensure funds are sent safely to intended recipients",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tyleradams/safe-send.git"
@@ -10,7 +10,8 @@
   "main": "./dist/bundle.js",
   "files": [
     "dist/",
-    "snap.manifest.json"
+    "snap.manifest.json",
+    "icons/"
   ],
   "scripts": {
     "allow-scripts": "yarn workspace root allow-scripts",
